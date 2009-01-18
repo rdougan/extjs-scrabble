@@ -1,0 +1,80 @@
+body,
+html,
+body * {
+  font-family:Georgia, Helvetica, Arial;
+}
+
+/* Board */
+.x-scrabble-game .x-scrabble-place {
+  background:#C8C2A5;
+  
+  float:left;
+  
+  width:37px;
+  height:37px;
+  
+  margin:1px;
+}
+
+/* Special Places */
+.x-scrabble-game .x-scrabble-place.triple-word {
+  background:#FE6A50;
+}
+.x-scrabble-game .x-scrabble-place.double-word {
+  background:#F9BAA8;
+}
+.x-scrabble-game .x-scrabble-place.triple-letter {
+  background:#469DAF;
+}
+.x-scrabble-game .x-scrabble-place.double-letter {
+  background:#BAD0CB;
+}
+.x-scrabble-game .x-scrabble-place.center {
+  background:#888;
+}
+
+/* Rack */
+.x-scrabble-rack {
+  
+}
+
+/* Tile */
+.x-scrabble-tile {
+  position:relative;
+  
+  display:inline-block;
+  
+  background:#ccc;
+  
+  border:1px solid #aaa;
+  
+  margin:1px;
+  
+  height:33px;
+  width:33px;
+  
+  cursor:pointer;
+  cursor:hand;
+}
+.x-scrabble-tile span.letter {
+  display:block;
+  
+  position:absolute;
+  
+  top:1px;
+  
+  width:33px;
+  
+  text-transform:uppercase;
+  font-size:27px;
+  text-align:center;
+}
+.x-scrabble-tile span.value {
+  position:absolute;
+  
+  bottom:-1px;
+  right:1px;
+  
+  font-size:9px;
+}
+
