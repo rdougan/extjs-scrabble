@@ -29,6 +29,20 @@ Ext.extend(Ext.ux.Scrabble.Tile, Ext.Component, {
   value: null,
   
   /**
+   * @property onBoard
+   * @type Boolean
+   * True if the tile has been placed on the board
+   */
+  onBoard: false,
+  
+  /**
+   * @property droppedOnPlace
+   * @type Ext.ux.Scrabble.Place
+   * Link to the place the tile is placed on. Null if not placed
+   */
+  droppedOnPlace: null,
+  
+  /**
    * Adds drag functionality to the tile
    */
   initalizeDrag: function() {
@@ -46,6 +60,52 @@ Ext.extend(Ext.ux.Scrabble.Tile, Ext.Component, {
     });
   },
   
+  /**
+   * Changes the board status to the defined. Blank for toggle
+   * @param {Boolean} onBoard True/false
+   */
+  changeBoardStatus: function(onBoard) {
+    if(onBoard){
+      // Check if it isn't already the same
+      if(this.onBoard !== onBoard){
+        this.onBoard = onBoard;
+      }
+      return;
+    }
+    
+    // Toggle
+    this.onBoard = (this.onBoard) ? this.onBoard = false : this.onBoard = true;
+  },
+  
+  /**
+   * Returns the tile to the scrabble rack
+   */
+  returnTile: function() {
+    // Check if it isn't on the board (cannot return)
+    if(!this.onBoard){
+      return;
+    }
+    
+    // Remove the tile from the scrabble board
+    this.droppedOnPlace.remove(this);
+    
+    // Change dropped on status of the place
+    this.droppedOnPlace.changeDroppedOnStatus(false);
+    
+    // Revert the dropped on place to null
+    this.droppedOnPlace = null;
+    
+    // Change board status so we can drag again
+    this.changeBoardStatus(false);
+    
+    // Add the tile back onto the rack and run doLayout
+    Scrabble.getScrabbleRack().addTile({
+      letter: this.letter,
+      value:  this.value
+    });
+    Scrabble.getScrabbleRack().doLayout();
+  },
+  
   // private
   onRender: function(ct, position) {
     var ct = ct || Ext.getBody();
@@ -60,6 +120,9 @@ Ext.extend(Ext.ux.Scrabble.Tile, Ext.Component, {
     
     // Make the tile unselectable
     this.el.unselectable();
+    
+    // Make it dbl clickable
+    this.el.on('dblclick', this.returnTile, this);
     
     // Add drag functionality to the tile
     this.initalizeDrag();

@@ -7,15 +7,17 @@ Ext.ux.Scrabble.Rack = function(config) {
   var config = config || {};
   
   Ext.applyIf(config, {
-    id:  'scrabble_rack',
-    cls: 'x-scrabble-rack'
+    id:     'scrabble_rack',
+    cls:    'x-scrabble-rack',
+    border: false
   });
  
  Ext.ux.Scrabble.Rack.superclass.constructor.call(this, config);
  
- this.render();
+ // Call the doLayout method when adding tiles to the rack
+ this.on('add', this.doLayout, this);
 };
-Ext.extend(Ext.ux.Scrabble.Rack, Ext.Component, {
+Ext.extend(Ext.ux.Scrabble.Rack, Ext.Panel, {
   
   /**
    * @property tiles
@@ -164,26 +166,17 @@ Ext.extend(Ext.ux.Scrabble.Rack, Ext.Component, {
    * @param {Object} config Tile config with letter and value properties
    */
   addTile: function(config) {
-    var config = config || {};
+    var tile = new Ext.ux.Scrabble.Tile(config);
     
-    Ext.applyIf(config, {
-      renderTo: this.id
-    });
-    
-    new Ext.ux.Scrabble.Tile(config);
+    // Add the tile to the rack
+    this.add(tile);
   },
   
   // private
-  render: function(ct, position) {
-    var ct = Ext.getBody();
+  onRender: function(ct, position) {
+    Ext.ux.Scrabble.Rack.superclass.onRender.apply(this, arguments);
     
-    // Create the place element
-    this.el = ct.createChild({
-      id:   this.id,
-      cls:  this.cls
-    });
-    
-    // Deal the tiles to the user
+    // Deal the tiles onto the scrabble rack
     this.dealTiles();
   }
   

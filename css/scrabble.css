@@ -1,9 +1,3 @@
-body,
-html,
-body * {
-  font-family:Georgia, Helvetica, Arial;
-}
-
 /* Board */
 .x-scrabble-game .x-scrabble-place {
   background:#C8C2A5;
@@ -34,8 +28,16 @@ body * {
 }
 
 /* Rack */
-.x-scrabble-rack {
+.x-toolbar table {
+  width:100%;
+}
+.x-scrabble-rack * {
+  background:transparent;
+}
+.x-scrabble-rack .x-panel-body {
+  text-align:center;
   
+  padding:0;
 }
 
 /* Tile */
@@ -61,13 +63,14 @@ body * {
   
   position:absolute;
   
-  top:1px;
+  top:5px;
   
   width:33px;
   
   text-transform:uppercase;
-  font-size:27px;
+  font-size:26px;
   text-align:center;
+  font-family:Times !important;
 }
 .x-scrabble-tile span.value {
   position:absolute;

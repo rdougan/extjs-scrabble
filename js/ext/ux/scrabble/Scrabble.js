@@ -4,11 +4,14 @@ Ext.ux.Scrabble.Game = function() {
   // Scrabble Board
   this.scrabbleBoard = new Ext.ux.Scrabble.Board();
   
+  // Scrabble Rack
+  this.scrabbleRack = new Ext.ux.Scrabble.Rack();
+  
   // Reset Button
   this.resetBtn = new Ext.Button({
     text:    'Reset',
     handler: function(){
-      this.scrabbleBoard.resetBoard();
+      this.getScrabbleBoard().resetBoard();
     },
     scope:   this
   });
@@ -19,12 +22,10 @@ Ext.ux.Scrabble.Game = function() {
     title:  'Ext Scrabble',
     id:     'scrabble_game',
     cls:    'x-scrabble-game',
-    items:  [this.scrabbleBoard],
-    tbar:   [this.resetBtn]
+    items:  [this.getScrabbleBoard()],
+    tbar:   [this.resetBtn],
+    bbar:   [this.getScrabbleRack()]
   });
-  
-  // Create the rack
-  this.rack = new Ext.ux.Scrabble.Rack();
 };
 
 Ext.ux.Scrabble.Game.prototype = {
@@ -34,6 +35,22 @@ Ext.ux.Scrabble.Game.prototype = {
    */
   launch: function() {
     this.win.show();
+  },
+  
+  /**
+   * Returns instance of the scrabble board
+   * @return {Ext.ux.Scrabble.Board} Instance of the scrabble board
+   */
+  getScrabbleBoard: function() {
+    return this.scrabbleBoard;
+  },
+  
+  /**
+   * Returns instance of the scrabble rack
+   * @return {Ext.ux.Scrabble.Rack} Instance of the scrabble rack
+   */
+  getScrabbleRack: function() {
+    return this.scrabbleRack;
   }
   
 };

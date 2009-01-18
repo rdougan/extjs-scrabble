@@ -19,8 +19,10 @@ Ext.ux.Scrabble.Place = function(config) {
   this.id = 'place-' + config.placeX + '-' + config.placeY;
   
   Ext.ux.Scrabble.Place.superclass.constructor.call(this, config);
+  
+  this.on('add', this.doLayout, this);
 };
-Ext.extend(Ext.ux.Scrabble.Place, Ext.Component, {
+Ext.extend(Ext.ux.Scrabble.Place, Ext.Container, {
   
   /**
    * @property placeX
@@ -298,18 +300,44 @@ Ext.extend(Ext.ux.Scrabble.Place, Ext.Component, {
   },
   
   /**
+   * Change the dropped on status of the place. Leave blank to toggle
+   * @param {Boolean} droppedOn The current dropped on status
+   */
+  changeDroppedOnStatus: function(droppedOn) {
+    if(droppedOn){
+      // Check if it isn't already the same
+      if(this.droppedOn !== droppedOn){
+        this.droppedOn = droppedOn;
+      }
+      return;
+    }
+    
+    // Toggle
+    this.droppedOn = (this.droppedOn) ? this.droppedOn = false : this.droppedOn = true;
+  },
+  
+  /**
    * Function description
    * @param {Ext.ux.Scrabble.Place} place The place where the tile was dropped
    * @param {Ext.ux.Scrabble.Tile} tile The tile which was dropped
    */
   droppedTile: function(place, tile) {
     // Disable the place from being dropable
-    place.droppedOn = true;
+    place.changeDroppedOnStatus(true);
     
     // Move the tile into the place
-    place.el.insertFirst(tile.el);
+    //place.el.insertFirst(tile.el);
+    place.add(tile);
+    
+    // Change the onBoard status of the tile
+    tile.changeBoardStatus(true);
+    
+    // Add a link from the tile to the place
+    tile.droppedOnPlace = place;
     
     console.log('Dropped!');
+    
+    return true;
   },
   
   // private
