@@ -14,7 +14,7 @@ Ext.ux.Scrabble.Rack = function(config) {
  
  Ext.ux.Scrabble.Rack.superclass.constructor.call(this, config);
  
- // Call the doLayout method when adding tiles to the rack
+ // Add listeners
  this.on('add', this.doLayout, this);
 };
 Ext.extend(Ext.ux.Scrabble.Rack, Ext.Panel, {
@@ -138,6 +138,11 @@ Ext.extend(Ext.ux.Scrabble.Rack, Ext.Panel, {
    * Randomizes the tiles and deals 7 to the user
    */
   dealTiles: function() {
+    // Remove all the items
+    if (this.items) {
+      this.items.each(function(item) { this.remove(item); }, this);
+    };
+    
     // Loop through each of the 7 tiles
     for (var i=0; i < 7; i++) {
       // Generate a random number

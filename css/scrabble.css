@@ -81,3 +81,20 @@
   font-size:9px;
 }
 
+/* Help Window */
+.x-scrabble-help {
+  padding:5px;
+}
+
+.x-scrabble-help div {
+  background:transparent;
+}
+.x-scrabble-help h1 {
+  font-size:130%;
+  
+  margin-bottom:2px;
+}
+.x-scrabble-help ul,
+.x-scrabble-help p {
+  margin-bottom:10px;
+}

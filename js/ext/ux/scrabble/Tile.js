@@ -52,10 +52,24 @@ Ext.extend(Ext.ux.Scrabble.Tile, Ext.Component, {
     // Create the dragSource
     this.dragSource = new Ext.dd.DragSource(this.el, {
       ddGroup:     'tiles',
+      
       getDragData: function() {
         return {
           tile: tile
         };
+      },
+      
+      /**
+       * Finds the offset of the click event relative to the card and sets this as the offset delta
+       * for the ghost element so that the click point of the card is kept with the mouse pointer
+       */
+      autoOffset: function(x, y) {
+        var tileXY = tile.getEl().getXY();
+        
+        var xDelta = x - tileXY[0] + 22;
+        var yDelta = y - tileXY[1];
+        
+        this.setDelta(xDelta, yDelta);
       }
     });
   },
@@ -88,6 +102,7 @@ Ext.extend(Ext.ux.Scrabble.Tile, Ext.Component, {
     
     // Remove the tile from the scrabble board
     this.droppedOnPlace.remove(this);
+    Scrabble.getScrabbleBoard().getPlacedTiles().remove(this);
     
     // Change dropped on status of the place
     this.droppedOnPlace.changeDroppedOnStatus(false);

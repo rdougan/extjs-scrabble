@@ -322,20 +322,34 @@ Ext.extend(Ext.ux.Scrabble.Place, Ext.Container, {
    * @param {Ext.ux.Scrabble.Tile} tile The tile which was dropped
    */
   droppedTile: function(place, tile) {
+    var newPlace = place;
+    var oldPlace = tile.droppedOnPlace;
+    
+    // Check if it is already dropped on
+    if (tile.droppedOnPlace) {
+      // Remove the previous reference of the tile frm the placed tiles property
+      // on the scrabble board
+      Scrabble.getScrabbleBoard().getPlacedTiles().remove(tile);
+      
+      // Disable the place from being dropable
+      oldPlace.changeDroppedOnStatus(false);
+    };
+    
     // Disable the place from being dropable
-    place.changeDroppedOnStatus(true);
+    newPlace.changeDroppedOnStatus(true);
     
     // Move the tile into the place
-    //place.el.insertFirst(tile.el);
-    place.add(tile);
+    newPlace.add(tile);
     
     // Change the onBoard status of the tile
     tile.changeBoardStatus(true);
     
     // Add a link from the tile to the place
-    tile.droppedOnPlace = place;
+    tile.droppedOnPlace = newPlace;
     
-    console.log('Dropped!');
+    // Add a reference of the tile into the placed tiles property
+    // on the scrabble board
+    Scrabble.getScrabbleBoard().getPlacedTiles().push(tile);
     
     return true;
   },
