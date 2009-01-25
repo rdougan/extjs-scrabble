@@ -32,13 +32,21 @@ Ext.ux.Scrabble.Board = function(config) {
      * @event undo
      * Fires when the user wants to undo their moves
      */
-    'undo'
+    'undo',
+    
+    /**
+     * @event checkaxis
+     * Fires when the board needs to be checked for a valid word
+     * on the X or Y axis
+     */
+    'checkaxis'
   );
   
   // Add event listeners
   this.on('newgame',    this.resetBoard, this, true);
   this.on('submitword', this.submitWord, this);
   this.on('undo',       this.resetBoard, this);
+  this.on('checkaxis',  this.checkAxis,  this);
 };
 Ext.extend(Ext.ux.Scrabble.Board, Ext.Panel, {
   
@@ -62,6 +70,9 @@ Ext.extend(Ext.ux.Scrabble.Board, Ext.Panel, {
    * Array of placed Ext.ux.Scrabble.Tile's
    */
   placedTiles: [],
+  
+  rowOnX: false,
+  rowOnY: false,
   
   /**
    * Generates the neccesary place elements for the scrabble board
@@ -112,14 +123,17 @@ Ext.extend(Ext.ux.Scrabble.Board, Ext.Panel, {
   },
   
   /**
-   * Submits a word and checks if it is valid
+   * Method which submits a word so it can be checked if it
+   * is valid, and if it is valid how many points it is worth.
    */
   submitWord: function() {
     var placedTiles = this.getPlacedTiles();
     
-    // Check if any tiles have been placed
+    // We need to check if the user has only placed 1 tile on the board, as
+    // that move is not valid. If it is not valid, return a message to the
+    // user using the status bar.
+    // TODO: Check if the tile is on the center
     if(placedTiles.length < 2) {
-      // No tiles on the board- return a message to the user
       return Ext.Msg.show({
         title:   'Ext Scrabble',
         msg:     'You have placed only 1 or no tiles on the board.',
@@ -127,85 +141,116 @@ Ext.extend(Ext.ux.Scrabble.Board, Ext.Panel, {
       })
     };
     
-    // Variables containing the first X + Y
-    var firstX = null;
-    var firstY = null;
-    
-    var rowOnX = false;
-    var rowOnY = false;
-    
-    // Loop through X
-    Ext.each(placedTiles, function(tile) {
-      var placeX = tile.droppedOnPlace.placeY;
-      
-      // Check if this is the first tile
-      if(!firstX) {
-        firstX = placeX;
-        return;
-      };
-      
-      // Now check if the tile has the same X as first tile
-      if(firstX != placeX) {
-        rowOnX = false;
-        return;
-      };
-      
-      // Seems like X is correct
-      rowOnX = true;
-    }, this);
-    
-    // Loop through Y
-    Ext.each(placedTiles, function(tile) {
-      var placeY = tile.droppedOnPlace.placeX;
-      
-      // Check if this is the first tile
-      if(!firstY) {
-        firstY = placeY;
-        return;
-      };
-      
-      // Now check if the tile has the same Y as first tile
-      if(firstY != placeY) {
-        rowOnY = false;
-        return;
-      };
-      
-      // Seems like Y is correct
-      rowOnY = true;
-    }, this);
-    
-    // No rows so error out
-    if(!(rowOnX || rowOnY)){
+    // We must now fire off an event which will check if there are
+    // any valid words on the X and Y axis
+    if(!this.fireEvent('checkaxis', this)) {
       return Ext.Msg.show({
         title:   'Ext Scrabble',
-        msg:     'You have not placed any tiles in a row. They must run horizontally or vertically.',
+        msg:     'You have not placed any tiles in a row. Your word must run horizontally or vertically across the scrabble board.',
         buttons: Ext.Msg.OK
-      })
-    }
+      });
+    };
     
     // Loop through the tiles and get the letters
     var letters = [];
     Ext.each(placedTiles, function(tile) {
       // check which direction we are looking for
-      if(rowOnX){ var dir = tile.droppedOnPlace.placeX; }
-      if(rowOnY){ var dir = tile.droppedOnPlace.placeY; }
+      if(this.rowOnX) { var dir = tile.droppedOnPlace.placeX; }
+      if(this.rowOnY) { var dir = tile.droppedOnPlace.placeY; }
       
       letters[dir] = tile.letter;
     }, this);
     
     var word = letters.join('');
     
-    if(this.validateWord(word)) {
-      console.log('VALID! ' + word);
+    // Now we have the word, we need to validate it
+    // TODO validate
+    return Ext.Msg.show({
+      title:   'Ext Scrabble',
+      msg:     '<strong>' + word + '</strong> is a valid word!',
+      buttons: Ext.Msg.OK
+    });
+  },
+  
+  /**
+   * Validates the X and Y axis of the board to check if there is
+   * any valid word placements on the board.
+   * @param {Array} placedTiles An array of the placed tiles which
+  *                             are currently on the board.
+   */
+  checkAxis: function() {
+    var placedTiles = this.getPlacedTiles();
+    
+    // Variables containing the first X + Y
+    var firstX = null;
+    var firstY = null;
+    
+    var isX = true;
+    var isY = true;
+    
+    // Firslty, lets loop through each of the tiles and check if
+    // there is a word on the X axis. There must be more than 1
+    // tile or it will error out.
+    Ext.each(placedTiles, function(tile) {
+      var placeX = tile.droppedOnPlace.placeY;
+    
+      // If the first X tile has not been set, set it and return so we
+      // can continue the loop.
+      if(!firstX) {
+        firstX = placeX;
+        return;
+      };
+    
+      // If the nth tile is not on the same X axis as the first tile, error
+      // out as it is not a valid word. return false means the ext.each will
+      // stop looping.
+      if(firstX != placeX) {
+        isX = false;
+        return false;
+      };
+    
+      // We have gotten this far so the word must be on the X axis.
+      this.rowOnX = true;
+      isX = true;
+    }, this);
+    
+    // // Now we must loop through the Y axis to see if there is a word there.
+    Ext.each(placedTiles, function(tile) {
+      var placeY = tile.droppedOnPlace.placeX;
+      
+      // If the first Y axis tile hasn't been set, set it and return.
+      if(!firstY) {
+        firstY = placeY;
+        return;
+      };
+      
+      // If the nth tile is not on the same axis as the first tile, it must
+      // not be a valid word. return false means the ext.each will stop
+      // looping.
+      if(firstY != placeY) {
+        isY = false;
+        return false;
+      };
+      
+      // Looks like the word is on the Y axis
+      this.rowOnY = true;
+      isY = true;
+    }, this);
+    
+    // // Check if the word is on the X or Y axis and return true/false
+    if (isX || isY) {
+      return true;
     } else {
-      console.log('fail');
-    }
+      return false;
+    };
   },
   
   /**
    * Uses the dictionary to check if a word is valid or not
    * @param {String} word The word which needs to be validated
    * @return {Boolean} True/valid to validate status
+   * TODO: Change this to use some kind of API so we don't have to load a large
+   *       file full of words.
    */
   validateWord: function(word) {
     if(Dictionary.indexOf(word) == -1){
@@ -223,6 +268,14 @@ Ext.extend(Ext.ux.Scrabble.Board, Ext.Panel, {
    */
   getPlacedTiles: function() {
     return this.placedTiles;
+  },
+  
+  /**
+   * Gets the status bar for the scrabble window and returns it
+   * @return {String} Status Bar
+   */
+  getStatusBar: function() {
+    return Ext.getCmp('scrabble-statusbar');
   },
   
   // private
