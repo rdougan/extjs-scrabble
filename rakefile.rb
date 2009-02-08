@@ -1,3 +1,5 @@
+# author edspencer edspencer.net
+
 require 'find'
 
 namespace :extjs do
